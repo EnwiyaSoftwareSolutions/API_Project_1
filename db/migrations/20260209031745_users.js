@@ -12,6 +12,10 @@ exports.up = function (knex, Promise) {
     table.string("password").notNullable();
     table.string("dateOfBirth").notNullable();
     table.string("role").notNullable();
+    table.string("bar_number");
+    table.string("law_firm");
+    table.string("specialization");
+    table.text("bio_summary");
     table.timestamp("created_at").defaultTo(knex.fn.now());
   });
 };
