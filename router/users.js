@@ -20,12 +20,36 @@ Router.post("/login", async (req, res) => {
       .status(500)
       .json({ error: "Appwrite database or collection not configured" });
   }
+
   try {
-    const users = await knex("users").select("*");
-    res.json(users);
+    const result = await databases.listDocuments(databaseId, collectionId, [
+      sdk.Query.equal("username", username),
+    ]);
+
+    if (!result || !result.documents || result.documents.length === 0) {
+      console.warn(`Login attempt: user not found: ${username}`);
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    const user = result.documents[0];
+
+    const valid = await hasher.check(user.password, password);
+    if (!valid) {
+      console.warn(`Login attempt: invalid password for user: ${username}`);
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    res.json({
+      id: user.$id,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+    });
   } catch (error) {
-    console.error("Error fetching users:", error.message);
-    res.status(500).json({ error: "Failed to fetch users" });
+    console.error("Error logging in user:", error.message);
+    res.status(500).json({ error: "Failed to log in user" });
   }
 });
 
@@ -47,7 +71,11 @@ Router.post("/register", async (req, res) => {
       sdk.ID.unique(),
       { username, email, password: hashedPassword, firstName, lastName, role },
     );
-    res.status(201).json({ id: document.$id, username: document.username, email: document.email });
+    res.status(201).json({
+      id: document.$id,
+      username: document.username,
+      email: document.email,
+    });
   } catch (error) {
     console.error("Error creating user:", error.message);
     res.status(500).json({ error: "Failed to create user" });
