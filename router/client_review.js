@@ -8,7 +8,18 @@ const databases = new sdk.Databases(appwriteClient);
 
 Router.get("/fetch_reviews", async (req, res) => {
   try {
-    const reviews = await knex("reviews").select("*");
+    // const reviews = await knex("reviews").select("*");
+    const databaseId = process.env.APPWRITE_DATABASE_ID;
+    const collectionId = process.env.APPWRITE_REVIEW_COLLECTION_ID;
+
+    if (!databaseId || !collectionId) {
+      return res
+        .status(500)
+        .json({ error: "Appwrite database or collection not configured" });
+    }
+
+    const result = await databases.listDocuments(databaseId, collectionId);
+    const reviews = result.documents;
     res.json(reviews);
   } catch (error) {
     console.error("Error fetching reviews:", error.message);
@@ -17,17 +28,27 @@ Router.get("/fetch_reviews", async (req, res) => {
 });
 Router.get("/fetch_single_review/:id", async (req, res) => {
   try {
-    const reviews = await knex("reviews").select("*");
-    res.json(reviews);
+    const databaseId = process.env.APPWRITE_DATABASE_ID;
+    const collectionId = process.env.APPWRITE_REVIEW_COLLECTION_ID;
+
+    if (!databaseId || !collectionId) {
+      return res
+        .status(500)
+        .json({ error: "Appwrite database or collection not configured" });
+    }
+
+    const reviewId = req.params.id;
+    const result = await databases.getDocument(databaseId, collectionId, reviewId);
+    res.json(result);
   } catch (error) {
     console.error("Error fetching reviews:", error.message);
     res.status(500).json({ error: "Failed to fetch reviews" });
   }
 });
 
-Router.post("/create_review", async (req, res) => {
-  const reviewer_name = req.body.reviewer_name;
-  if (!reviewer_name) {
+Router.post("/create_review/", async (req, res) => {
+  const item = req.body;
+  if (!item.reviewer_name) {
     return res
       .status(400)
       .json({ error: "Missing required field: reviewer_name" });
@@ -47,7 +68,7 @@ Router.post("/create_review", async (req, res) => {
       databaseId,
       collectionId,
       sdk.ID.unique(),
-      { reviewer_name },
+      { reviewer_name: item.reviewer_name, comment: item.comment, rating: item.rating },
     );
 
     res
