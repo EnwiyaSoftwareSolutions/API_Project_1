@@ -8,6 +8,7 @@ exports.up = function (knex, Promise) {
     table.string("reviewer_name").notNullable();
     table.string("reviewer_email");
     table.integer("rating").notNullable();
+    table.boolean('active').defaultTo(false);
     table.text("comment").notNullable();
     table.integer("user_id").unsigned().references("id").inTable("users").onDelete("CASCADE"); // lawyer being reviewed
     table.integer("client_id").unsigned().references("id").inTable("clients").onDelete("SET NULL");

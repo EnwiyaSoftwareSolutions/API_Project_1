@@ -18,14 +18,43 @@ Router.get("/fetch_reviews", async (req, res) => {
         .json({ error: "Appwrite database or collection not configured" });
     }
 
-    const result = await databases.listDocuments(databaseId, collectionId);
+    // const result = await databases.listDocuments(databaseId, collectionId);
+    const result = await databases.listDocuments(
+  databaseId,
+  collectionId,
+  [sdk.Query.equal("active", true)]
+);
     const reviews = result.documents;
-    res.json(reviews);
+    res.status(200).json(reviews);
   } catch (error) {
     console.error("Error fetching reviews:", error.message);
     res.status(500).json({ error: "Failed to fetch reviews" });
   }
 });
+
+
+Router.get("/admin_fetch_reviews", async (req, res) => {
+  try {
+    // const reviews = await knex("reviews").select("*");
+    const databaseId = process.env.APPWRITE_DATABASE_ID;
+    const collectionId = process.env.APPWRITE_REVIEW_COLLECTION_ID;
+
+    if (!databaseId || !collectionId) {
+      return res
+        .status(500)
+        .json({ error: "Appwrite database or collection not configured" });
+    }
+
+    const result = await databases.listDocuments(databaseId, collectionId);
+    const reviews = result.documents;
+    res.status(200).json(reviews);
+  } catch (error) {
+    console.error("Error fetching reviews:", error.message);
+    res.status(500).json({ error: "Failed to fetch reviews" });
+  }
+});
+
+
 Router.get("/fetch_single_review/:id", async (req, res) => {
   try {
     const databaseId = process.env.APPWRITE_DATABASE_ID;
