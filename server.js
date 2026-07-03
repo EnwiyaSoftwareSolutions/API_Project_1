@@ -19,6 +19,10 @@ app.use('/api', userRegisterRouter);
 app.use('/api', userRouter);
 app.use('/api', officeInfoRouter);
 
+app.get('/', (req, res) => {
+  res.status(200).json({ ok: true, service: 'API_Project_1' });
+});
+
 if (require.main === module) {
   app.listen(PORT, (err) => {
     if (err) {
