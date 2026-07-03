@@ -19,11 +19,14 @@ app.use('/api', userRegisterRouter);
 app.use('/api', userRouter);
 app.use('/api', officeInfoRouter);
 
+if (require.main === module) {
+  app.listen(PORT, (err) => {
+    if (err) {
+      console.error("Failed to start server:", err.message);
+      process.exit(1);
+    }
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
-app.listen(PORT, (err) => {
-  if (err) {
-    console.error("Failed to start server:", err.message);
-    process.exit(1);
-  }
-  console.log(`Server is running on port ${PORT}`);
-});
+module.exports = app;

@@ -2,7 +2,6 @@ const express = require("express");
 const sdk = require("node-appwrite");
 const appwriteClient = require("../config/app");
 const Router = express.Router();
-const knex = require("../db/knex");
 const hasher = require("../middleware/hasher");
 // const auth = new sdk.Auth(appwriteClient);
 
@@ -21,8 +20,11 @@ Router.post("/login", async (req, res) => {
       .json({ error: "Appwrite database or collection not configured" });
   }
   try {
-    const users = await knex("users").select("*");
-    res.json(users);
+    const result = await databases.listDocuments(databaseId, collectionId, [
+      sdk.Query.equal("username", username),
+      sdk.Query.limit(1),
+    ]);
+    res.json(result.documents);
   } catch (error) {
     console.error("Error fetching users:", error.message);
     res.status(500).json({ error: "Failed to fetch users" });
