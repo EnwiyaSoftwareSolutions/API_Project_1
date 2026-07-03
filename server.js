@@ -22,7 +22,10 @@ app.use('/api', officeInfoRouter);
 app.get('/', (req, res) => {
   res.status(200).json({ ok: true, service: 'API_Project_1' });
 });
-
+app.use((req, res, next) => {
+  console.log("Incoming:", req.method, req.originalUrl);
+  next();
+});
 if (require.main === module) {
   app.listen(PORT, (err) => {
     if (err) {
