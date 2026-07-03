@@ -13,11 +13,11 @@ const PORT = process.env.PORT || 9000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/api', emailRouter);
-app.use('/api', clientReviewRouter);
-app.use('/api', userRegisterRouter);
-app.use('/api', userRouter);
-app.use('/api', officeInfoRouter);
+app.use(emailRouter);
+app.use(clientReviewRouter);
+app.use(userRegisterRouter);
+app.use(userRouter);
+app.use(officeInfoRouter);
 
 app.get('/', (req, res) => {
   res.status(200).json({ ok: true, service: 'API_Project_1' });
