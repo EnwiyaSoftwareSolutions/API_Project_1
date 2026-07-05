@@ -40,6 +40,7 @@ const transporter = nodemailer.createTransport({
     user: process.env.G_USER,
     pass: process.env.G_PASS,
   },
+  family: 4,
 });
 
 // Optional: verify transporter on startup (non-blocking)
