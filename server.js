@@ -8,6 +8,7 @@ const userRouter = require("./router/users");
 const clientReviewRouter = require("./router/client_review");
 const officeInfoRouter = require("./router/office_info")
 const userRegisterRouter = require("./router/user_register")
+const blogRouter = require("./router/Blog.Router");
 
 const PORT = process.env.PORT || 9000;
 app.use(cors());
@@ -18,6 +19,7 @@ app.use(clientReviewRouter);
 app.use(userRegisterRouter);
 app.use(userRouter);
 app.use(officeInfoRouter);
+app.use(blogRouter);
 
 app.get('/', (req, res) => {
   res.status(200).json({ ok: true, service: 'API_Project_1' });

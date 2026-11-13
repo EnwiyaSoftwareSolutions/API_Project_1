@@ -1,26 +1,48 @@
 const jwt = require("jsonwebtoken");
-// const User = require("../module/userModule");
-// const Unotes = require('../modules/PatientNotes')
-//this code block taked in the users username and password and hases it to unreadable format called token for sacurity
-//  then the token and be time sensitive where we can have the code automaticly log out if there is not activity in a certain time.
-const auth = async (req, res, next) => {
+
+const auth = (req, res, next) => {
+  const secret = process.env.AUTH_TOKEN_NUM;
+  if (!secret) {
+    return res.status(500).json({ error: "Authentication is not configured" });
+  }
+
+  const authorization = req.get("Authorization");
+  const match = authorization && authorization.match(/^Bearer\s+(\S+)$/i);
+  if (!match) {
+    return res.status(401).json({ error: "Please authenticate" });
+  }
+
   try {
-    const token = req.header("Authorization").replace("Bearer ", "");
-    const decoded = jwt.verify(token, process.env.AUTH_TOKEN_NUM);
-    const user = await User.findOne({
-      _id: decoded._id,
-      "tokens.token": token,
-    });
-
-    if (!user) {
-      throw new Error();
+    const decoded = jwt.verify(match[1], secret);
+    if (
+      typeof decoded === "string" ||
+      typeof decoded.sub !== "string" ||
+      typeof decoded.username !== "string" ||
+      typeof decoded.role !== "string"
+    ) {
+      return res.status(401).json({ error: "Please authenticate" });
     }
-    req.token = token;
-    req.user = user;
 
-    next();
-  } catch (err) {
-    res.status(401).send({ err: `Please Authenticate` });
+    req.token = match[1];
+    req.user = {
+      id: decoded.sub,
+      username: decoded.username,
+      role: decoded.role,
+    };
+    return next();
+  } catch (error) {
+    return res.status(401).json({ error: "Please authenticate" });
   }
 };
+
+auth.requireRoles = (...roles) => (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Please authenticate" });
+  }
+  if (!roles.includes(req.user.role)) {
+    return res.status(403).json({ error: "Insufficient permissions" });
+  }
+  return next();
+};
+
 module.exports = auth;

@@ -1,6 +1,7 @@
 const express = require("express");
 const sdk = require('node-appwrite');
 const appwriteClient = require('../config/app');
+const auth = require("../middleware/auth");
 const Router = express.Router();
 
 const database = new sdk.Databases(appwriteClient);
@@ -31,7 +32,7 @@ Router.post("/client_register", async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-Router.get("/fetch_users", async (req, res) => {
+Router.get("/fetch_users", auth, auth.requireRoles("admin", "editor"), async (req, res) => {
     if (!databaseID || !collectionID) {
         return res.status(500).json({ error: "Appwrite database or collection not configured" });
     }

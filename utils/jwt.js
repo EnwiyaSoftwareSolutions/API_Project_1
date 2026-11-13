@@ -7,7 +7,10 @@ const jwt = require('jsonwebtoken');
  * @param {Object} [options] - Optional jwt.sign options (e.g., expiresIn)
  * @returns {string} JWT token
  */
-function generateToken(payload, secret, options = { expiresIn: '1h' }) {
+function generateToken(payload, secret, options = { expiresIn: "1h" }) {
+  if (!secret) {
+    throw new Error("JWT secret is required");
+  }
   return jwt.sign(payload, secret, options);
 }
 
